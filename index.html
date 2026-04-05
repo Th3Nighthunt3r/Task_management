@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Task Management</title>
+<script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -46,6 +47,17 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .btn-export{display:flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12.5px;font-weight:700;color:var(--text);cursor:pointer;transition:.15s;font-family:inherit}
 .btn-export:hover{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
 .btn-export svg{width:14px;height:14px;flex-shrink:0}
+/* export dropdown */
+.export-anchor{position:relative}
+.export-menu{position:absolute;top:calc(100% + 6px);left:0;min-width:210px;background:var(--white);border:1px solid var(--border);border-radius:12px;box-shadow:0 8px 32px rgba(0,0,0,.12);z-index:200;display:none;overflow:hidden}
+.export-menu.open{display:block}
+.export-menu-hd{padding:9px 14px 6px;font-size:10.5px;font-weight:800;color:var(--muted);text-transform:uppercase;letter-spacing:.5px}
+.export-opt{display:flex;align-items:center;gap:10px;padding:9px 14px;font-size:13px;font-weight:600;cursor:pointer;transition:.1s;color:var(--text)}
+.export-opt:hover{background:var(--bg)}
+.export-opt svg{width:15px;height:15px;flex-shrink:0}
+.export-opt .xls-badge{font-size:9.5px;font-weight:800;background:#16a34a;color:#fff;padding:1px 5px;border-radius:4px;margin-left:auto}
+.export-opt .json-badge{font-size:9.5px;font-weight:800;background:#6366f1;color:#fff;padding:1px 5px;border-radius:4px;margin-left:auto}
+.export-divider{height:1px;background:var(--border);margin:4px 0}
 .workspace-btn{display:flex;align-items:center;gap:6px;background:var(--bg);border:none;border-radius:8px;padding:6px 12px;font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer;font-family:inherit;transition:.15s}
 .workspace-btn:hover{background:var(--border)}
 .workspace-btn svg{width:14px;height:14px;color:var(--muted)}
@@ -387,10 +399,43 @@ tr:hover .list-actions{opacity:1}
       <input placeholder="Search tasks… (Ctrl+K)" id="search-input" oninput="handleSearch(this.value)"/>
     </div>
     <div class="tb-right">
-      <button class="btn-export" onclick="exportTasks()" title="Export tasks to a JSON file you can import on any device">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-        Export
-      </button>
+      <div class="export-anchor">
+        <button class="btn-export" onclick="toggleExportMenu(event)">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Export
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" style="width:12px;height:12px"><path d="M6 9l6 6 6-6"/></svg>
+        </button>
+        <div class="export-menu" id="export-menu">
+          <div class="export-menu-hd">Export as Excel</div>
+          <div class="export-opt" onclick="exportExcel('today');closeExportMenu()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            Today's Tasks
+            <span class="xls-badge">XLSX</span>
+          </div>
+          <div class="export-opt" onclick="exportExcel('week');closeExportMenu()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            This Week's Tasks
+            <span class="xls-badge">XLSX</span>
+          </div>
+          <div class="export-opt" onclick="exportExcel('all');closeExportMenu()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
+            All Tasks
+            <span class="xls-badge">XLSX</span>
+          </div>
+          <div class="export-opt" onclick="openExcelCustomModal();closeExportMenu()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+            Custom Date Range…
+            <span class="xls-badge">XLSX</span>
+          </div>
+          <div class="export-divider"></div>
+          <div class="export-menu-hd">Backup / Sync</div>
+          <div class="export-opt" onclick="exportTasks();closeExportMenu()">
+            <svg viewBox="0 0 24 24" fill="none" stroke="#6366f1" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            Export Backup
+            <span class="json-badge">JSON</span>
+          </div>
+        </div>
+      </div>
       <button class="btn-export" onclick="importTasks()" title="Import tasks from a previously exported JSON file">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
         Import
@@ -594,6 +639,38 @@ tr:hover .list-actions{opacity:1}
     <div class="modal-ftr">
       <button class="btn-cancel" onclick="closeModal()">Cancel</button>
       <button class="btn-new" id="modal-save" onclick="saveTask()">Create Task</button>
+    </div>
+  </div>
+</div>
+
+<!-- EXCEL CUSTOM EXPORT MODAL -->
+<div class="overlay" id="excel-overlay" onclick="if(event.target===this)closeExcelCustomModal()">
+  <div class="modal" style="width:400px">
+    <div class="modal-hd">
+      <h2>Export to Excel</h2>
+      <button class="modal-close" onclick="closeExcelCustomModal()">×</button>
+    </div>
+    <p style="font-size:13px;color:var(--muted);margin-bottom:18px">Choose a date range to export your tasks as an Excel spreadsheet.</p>
+    <div class="form-2">
+      <div class="fg">
+        <label>From Date</label>
+        <input type="date" id="xl-from"/>
+      </div>
+      <div class="fg">
+        <label>To Date</label>
+        <input type="date" id="xl-to"/>
+      </div>
+    </div>
+    <div class="fg">
+      <label>Include Statuses</label>
+      <div id="xl-status-checks" style="display:flex;flex-wrap:wrap;gap:8px;margin-top:4px"></div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn-cancel" onclick="closeExcelCustomModal()">Cancel</button>
+      <button class="btn-new" onclick="runCustomExcelExport()" style="background:#16a34a;box-shadow:0 2px 8px rgba(22,163,74,.3)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Download Excel
+      </button>
     </div>
   </div>
 </div>
@@ -1028,6 +1105,7 @@ function setFilter(v, el){
 function closeDropdowns(){
   document.getElementById('filter-dropdown').classList.remove('open');
   document.getElementById('notif-panel').classList.remove('open');
+  document.getElementById('export-menu').classList.remove('open');
 }
 
 /* ══ NOTIFICATIONS ══ */
@@ -1380,6 +1458,95 @@ if(!tasks.length){
     {id:uid(),title:'Customer NPS survey',desc:'Send NPS survey and analyze results.',priority:'low',due:add(4),status:'cancelled',progress:10,created:new Date().toISOString()},
   ];
   save();
+}
+
+/* ══ EXPORT MENU ══ */
+function toggleExportMenu(e){
+  e.stopPropagation();
+  document.getElementById('export-menu').classList.toggle('open');
+  document.getElementById('notif-panel').classList.remove('open');
+  document.getElementById('filter-dropdown').classList.remove('open');
+}
+function closeExportMenu(){ document.getElementById('export-menu').classList.remove('open') }
+
+/* ══ EXCEL EXPORT ══ */
+function tasksToRows(list){
+  return list.map(t=>({
+    'Title':        t.title,
+    'Description':  t.desc||'',
+    'Priority':     t.priority.charAt(0).toUpperCase()+t.priority.slice(1),
+    'Status':       STATUS_LBL[t.status]||t.status,
+    'Due Date':     t.due ? fmtFull(t.due) : '',
+    'Progress (%)': prog(t),
+    'Created':      t.created ? new Date(t.created).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '',
+  }));
+}
+
+function buildExcel(rows, sheetName, filename){
+  if(!rows.length){ alert('No tasks found for the selected range.'); return }
+  const ws = XLSX.utils.json_to_sheet(rows);
+  // column widths
+  ws['!cols'] = [
+    {wch:36},{wch:48},{wch:10},{wch:14},{wch:14},{wch:13},{wch:14}
+  ];
+  // style header row green
+  const range = XLSX.utils.decode_range(ws['!ref']);
+  for(let C=range.s.c; C<=range.e.c; C++){
+    const cell = ws[XLSX.utils.encode_cell({r:0,c:C})];
+    if(cell) cell.s = {font:{bold:true,color:{rgb:'FFFFFF'}},fill:{fgColor:{rgb:'16A34A'}},alignment:{horizontal:'center'}};
+  }
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, sheetName);
+  XLSX.writeFile(wb, filename);
+}
+
+function exportExcel(mode){
+  const today = new Date(); let list, label;
+  if(mode==='today'){
+    list  = tasks.filter(t=>isToday(t.due));
+    label = `Today_${todayStr()}`;
+  } else if(mode==='week'){
+    list  = tasks.filter(t=>isThisWeek(t.due));
+    const sw=new Date(today); sw.setDate(today.getDate()-today.getDay());
+    const ew=new Date(sw); ew.setDate(sw.getDate()+6);
+    label = `Week_${toStr(sw)}_to_${toStr(ew)}`;
+  } else {
+    list  = [...tasks];
+    label = `All_${todayStr()}`;
+  }
+  buildExcel(tasksToRows(list), mode==='week'?'This Week':mode==='today'?'Today':'All Tasks',
+    `TaskManagement_${label}.xlsx`);
+}
+
+/* ══ EXCEL CUSTOM EXPORT MODAL ══ */
+function openExcelCustomModal(){
+  // default: today to +7
+  const from = new Date(), to = new Date(); to.setDate(to.getDate()+6);
+  document.getElementById('xl-from').value = toStr(from);
+  document.getElementById('xl-to').value   = toStr(to);
+  // build status checkboxes
+  const wrap = document.getElementById('xl-status-checks');
+  wrap.innerHTML = COLS.map(c=>`
+    <label style="display:flex;align-items:center;gap:5px;cursor:pointer;font-size:12.5px;font-weight:600;padding:4px 9px;border-radius:7px;border:1px solid var(--border);background:var(--bg)">
+      <input type="checkbox" value="${c.id}" checked style="accent-color:${c.color}"/>
+      <span style="color:${c.color}">${c.label}</span>
+    </label>`).join('');
+  document.getElementById('excel-overlay').classList.add('open');
+}
+function closeExcelCustomModal(){ document.getElementById('excel-overlay').classList.remove('open') }
+
+function runCustomExcelExport(){
+  const from = document.getElementById('xl-from').value;
+  const to   = document.getElementById('xl-to').value;
+  if(!from||!to){ alert('Please select both a From and To date.'); return }
+  if(from>to){ alert('From date must be before or equal to To date.'); return }
+  const checked = [...document.querySelectorAll('#xl-status-checks input:checked')].map(i=>i.value);
+  if(!checked.length){ alert('Please select at least one status to include.'); return }
+  const list = tasks.filter(t=>t.due && t.due>=from && t.due<=to && checked.includes(t.status));
+  // sort by due date
+  list.sort((a,b)=>a.due.localeCompare(b.due));
+  buildExcel(tasksToRows(list), 'Tasks', `TaskManagement_${from}_to_${to}.xlsx`);
+  closeExcelCustomModal();
 }
 
 /* ══ EXPORT / IMPORT ══ */
