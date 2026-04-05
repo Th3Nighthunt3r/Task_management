@@ -221,15 +221,18 @@ tr:hover .list-actions{opacity:1}
 .gantt-day-lbl.today-lbl{background:rgba(124,58,237,.08);color:var(--primary)}
 .gantt-row{display:flex;border-bottom:1px solid var(--border)}
 .gantt-row:last-child{border-bottom:none}
-.gantt-task-name{width:220px;flex-shrink:0;padding:9px 14px;font-size:12.5px;font-weight:600;border-right:1px solid var(--border);display:flex;align-items:center;gap:7px;cursor:pointer;transition:.1s;background:var(--white)}
+.gantt-task-name{width:220px;flex-shrink:0;padding:8px 14px;font-size:12.5px;font-weight:600;border-right:1px solid var(--border);display:flex;align-items:center;gap:7px;cursor:pointer;transition:.1s;background:var(--white)}
 .gantt-task-name:hover{background:var(--bg)}
-.gantt-timeline{flex:1;position:relative;height:44px;display:flex;align-items:center}
+.gantt-timeline{flex:1;position:relative;height:52px;display:flex;align-items:center}
 .gantt-tl-bg{position:absolute;inset:0;display:flex}
 .gantt-tl-bg-day{flex:1;border-right:1px solid var(--border);height:100%}
 .gantt-tl-bg-day:last-child{border-right:none}
-.gantt-tl-bg-day.today-bg{background:rgba(124,58,237,.04)}
-.gantt-bar{position:absolute;height:22px;border-radius:5px;cursor:pointer;display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:1;transition:.1s}
-.gantt-bar:hover{opacity:.82;transform:scaleY(1.06)}
+.gantt-tl-bg-day.today-bg{background:rgba(124,58,237,.06)}
+.gantt-tl-bg-day.weekend-bg{background:rgba(0,0,0,.025)}
+.gantt-bar{position:absolute;height:22px;border-radius:5px;cursor:grab;display:flex;align-items:center;padding:0 8px;font-size:11px;font-weight:700;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;z-index:1;transition:box-shadow .1s}
+.gantt-bar:hover{box-shadow:0 2px 10px rgba(0,0,0,.18)}
+.gantt-bar-wrap:hover .gantt-resize-handle{opacity:1!important}
+.gantt-resize-handle{opacity:0;transition:opacity .15s}
 
 /* EMPTY STATE */
 .empty-state{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:var(--muted);text-align:center;padding:40px}
@@ -606,14 +609,18 @@ tr:hover .list-actions{opacity:1}
       <label>Description</label>
       <textarea id="f-desc" placeholder="Add details…"></textarea>
     </div>
+    <div class="fg">
+      <label>Priority</label>
+      <select id="f-priority">
+        <option value="high">High</option>
+        <option value="middle" selected>Middle</option>
+        <option value="low">Low</option>
+      </select>
+    </div>
     <div class="form-2">
       <div class="fg">
-        <label>Priority</label>
-        <select id="f-priority">
-          <option value="high">High</option>
-          <option value="middle" selected>Middle</option>
-          <option value="low">Low</option>
-        </select>
+        <label>Start Date</label>
+        <input type="date" id="f-start"/>
       </div>
       <div class="fg">
         <label>Due Date</label>
@@ -877,9 +884,9 @@ function cardHTML(t){
       <div class="card-title">${esc(t.title)}</div>
       <span class="pri-badge pri-${t.priority}">${t.priority.charAt(0).toUpperCase()+t.priority.slice(1)}</span>
     </div>
-    ${t.due ? `<div class="card-date${od?' overdue':''}">
+    ${(t.start||t.due) ? `<div class="card-date${od?' overdue':''}">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>
-      ${fmtFull(t.due)}${od?' · Overdue':''}
+      ${t.start&&t.due&&t.start!==t.due ? fmtShort(t.start)+' → '+fmtFull(t.due) : fmtFull(t.due||t.start)}${od?' · Overdue':''}
     </div>` : '<div style="height:4px"></div>'}
     <div class="prog-track"><div class="prog-bar" style="width:${p}%"></div></div>
     <div class="card-foot">
@@ -1007,65 +1014,212 @@ function renderTaskCal(){
 function shiftTaskCal(d){ if(d===0) taskCalDate=new Date(); else taskCalDate.setMonth(taskCalDate.getMonth()+d); renderTaskCal() }
 
 /* ══ GANTT VIEW ══ */
+let ganttEarliest=null, ganttTotalDays=0, ganttTimelineWidth=0;
+let ganttDrag=null; // {id, mode:'move'|'resize-left'|'resize-right', startX, origStart, origDue, timelineEl}
+
+function ganttDateToX(dateStr, tlW){
+  const d=new Date(dateStr+'T00:00');
+  return ((d-ganttEarliest)/864e5)/ganttTotalDays*tlW;
+}
+function ganttXToDate(px, tlW){
+  const days=Math.round(px/tlW*ganttTotalDays);
+  const d=new Date(ganttEarliest); d.setDate(d.getDate()+days);
+  return toStr(d);
+}
+
 function renderGantt(){
   const wrap = document.getElementById('gantt-wrap');
   const list = filtered().filter(t=>t.due);
-  if(!list.length){ wrap.innerHTML=emptyHTML('No tasks with due dates','Add a due date to tasks to see them in Gantt view.'); return }
+  if(!list.length){ wrap.innerHTML=emptyHTML('No tasks with due dates','Add a start & due date to tasks to see them in Gantt view.'); return }
 
   const today=new Date(); today.setHours(0,0,0,0);
-  const dueDates=list.map(t=>new Date(t.due+'T00:00'));
-  const earliest=new Date(Math.min(...dueDates, today)-4*864e5);
-  const latest=new Date(Math.max(...dueDates)+4*864e5);
-  const totalDays=Math.min(60,Math.round((latest-earliest)/864e5)+1);
+  const allStarts=list.map(t=>new Date((t.start||t.due)+'T00:00'));
+  const allDues  =list.map(t=>new Date(t.due+'T00:00'));
+  const rawEarliest=new Date(Math.min(...allStarts, today));
+  const rawLatest  =new Date(Math.max(...allDues));
+  ganttEarliest=new Date(rawEarliest); ganttEarliest.setDate(rawEarliest.getDate()-3);
+  const ganttLatest=new Date(rawLatest); ganttLatest.setDate(rawLatest.getDate()+5);
+  ganttTotalDays=Math.max(14, Math.round((ganttLatest-ganttEarliest)/864e5)+1);
 
   const days=[];
-  for(let i=0;i<totalDays;i++){ const d=new Date(earliest); d.setDate(earliest.getDate()+i); days.push(d) }
+  for(let i=0;i<ganttTotalDays;i++){ const d=new Date(ganttEarliest); d.setDate(ganttEarliest.getDate()+i); days.push(d) }
 
-  const dayHds = days.map(d=>{
+  const dayHds=days.map(d=>{
     const isT=d.toDateString()===today.toDateString();
-    const lbl=d.getDate()===1?d.toLocaleDateString('en-US',{month:'short',day:'numeric'}):String(d.getDate());
+    const showMonth=d.getDate()===1||d===days[0];
+    const lbl=showMonth?d.toLocaleDateString('en-US',{month:'short',day:'numeric'}):String(d.getDate());
     return `<div class="gantt-day-lbl${isT?' today-lbl':''}">${lbl}</div>`;
   }).join('');
 
-  const dayBgs = days.map(d=>{
+  const dayBgs=days.map(d=>{
     const isT=d.toDateString()===today.toDateString();
-    return `<div class="gantt-tl-bg-day${isT?' today-bg':''}"></div>`;
+    const isSat=d.getDay()===6, isSun=d.getDay()===0;
+    return `<div class="gantt-tl-bg-day${isT?' today-bg':(isSat||isSun?' weekend-bg':'')}"></div>`;
   }).join('');
 
-  const sorted=[...list].sort((a,b)=>a.due.localeCompare(b.due));
+  const sorted=[...list].sort((a,b)=>(a.start||a.due).localeCompare(b.start||b.due));
 
-  const rows = sorted.map(t=>{
-    const dueD=new Date(t.due+'T00:00');
-    const p=prog(t);
-    const estDur=Math.max(1, Math.round(p/12));
-    const startD=new Date(dueD); startD.setDate(dueD.getDate()-estDur+1);
-    const barStart=Math.max(0, Math.round((startD-earliest)/864e5));
-    const barEnd=Math.round((dueD-earliest)/864e5);
-    const barW=Math.max(1.5, ((barEnd-barStart+1)/totalDays)*100);
-    const barL=(barStart/totalDays)*100;
+  const rows=sorted.map(t=>{
+    const startStr=t.start||t.due;
+    const dueStr=t.due;
     const clr=STATUS_CLR[t.status];
-    return `<div class="gantt-row">
+    const p=prog(t);
+    const od=isOverdue(t);
+    return `<div class="gantt-row" data-id="${t.id}">
       <div class="gantt-task-name" onclick="openEdit('${t.id}')">
         <span class="pri-badge pri-${t.priority}" style="padding:1px 5px;font-size:10px">${t.priority[0].toUpperCase()}</span>
-        <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${esc(t.title)}">${esc(t.title)}</span>
+        <div style="flex:1;min-width:0">
+          <div style="overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12.5px;font-weight:600" title="${esc(t.title)}">${esc(t.title)}</div>
+          <div style="font-size:10.5px;color:var(--muted);margin-top:1px">${fmtShort(startStr)} → ${fmtShort(dueStr)}</div>
+        </div>
       </div>
-      <div class="gantt-timeline">
+      <div class="gantt-timeline" id="gtl-${t.id}">
         <div class="gantt-tl-bg">${dayBgs}</div>
-        <div class="gantt-bar" style="left:${barL.toFixed(2)}%;width:${barW.toFixed(2)}%;background:${clr};opacity:${t.status==='cancelled'?.45:1}"
-          onclick="openEdit('${t.id}')" title="${esc(t.title)} — due ${fmtFull(t.due)}">
-          ${barW>7?p+'%':''}
+        <div class="gantt-bar-wrap" data-id="${t.id}" data-start="${startStr}" data-due="${dueStr}"
+          style="position:absolute;top:50%;transform:translateY(-50%);height:26px;z-index:2;cursor:grab"
+          title="${esc(t.title)}: ${fmtShort(startStr)} → ${fmtShort(dueStr)}">
+          <!-- resize left handle -->
+          <div class="gantt-resize-handle gantt-resize-l" data-id="${t.id}" data-mode="resize-left"
+            style="position:absolute;left:0;top:0;width:8px;height:100%;cursor:ew-resize;z-index:3;border-radius:5px 0 0 5px;background:rgba(0,0,0,.18)"></div>
+          <!-- bar body -->
+          <div class="gantt-bar-inner" style="position:absolute;inset:0;border-radius:5px;background:${clr};opacity:${t.status==='cancelled'?.45:1};
+            display:flex;align-items:center;padding:0 10px;font-size:11px;font-weight:700;color:#fff;overflow:hidden;white-space:nowrap">
+            ${od?'⚠️ ':''}<span class="gantt-bar-label">${p}%</span>
+          </div>
+          <!-- progress fill -->
+          <div style="position:absolute;left:0;top:0;height:100%;width:${p}%;background:rgba(255,255,255,.22);border-radius:5px;pointer-events:none"></div>
+          <!-- resize right handle -->
+          <div class="gantt-resize-handle gantt-resize-r" data-id="${t.id}" data-mode="resize-right"
+            style="position:absolute;right:0;top:0;width:8px;height:100%;cursor:ew-resize;z-index:3;border-radius:0 5px 5px 0;background:rgba(0,0,0,.18)"></div>
         </div>
       </div>
     </div>`;
   }).join('');
 
-  wrap.innerHTML=`<div class="gantt-container">
+  wrap.innerHTML=`<div class="gantt-container" id="gantt-container">
     <div class="gantt-header">
       <div class="gantt-name-col">Task</div>
       <div class="gantt-days-hd">${dayHds}</div>
     </div>
     ${rows}
-  </div>`;
+  </div>
+  <div id="gantt-tooltip" style="position:fixed;background:#1e1b4b;color:#fff;padding:6px 10px;border-radius:7px;font-size:12px;font-weight:600;pointer-events:none;z-index:500;display:none;white-space:nowrap"></div>`;
+
+  // position bars after render (need actual pixel widths)
+  requestAnimationFrame(()=>positionGanttBars(sorted));
+  attachGanttDrag();
+}
+
+function positionGanttBars(sorted){
+  sorted.forEach(t=>{
+    const tl=document.getElementById('gtl-'+t.id); if(!tl) return;
+    const tlW=tl.getBoundingClientRect().width;
+    if(!tlW) return;
+    const wrap=tl.querySelector('.gantt-bar-wrap'); if(!wrap) return;
+    const startStr=t.start||t.due, dueStr=t.due;
+    const x0=ganttDateToX(startStr,tlW);
+    const x1=ganttDateToX(dueStr,tlW)+tlW/ganttTotalDays; // include the due day itself
+    const w=Math.max(20,x1-x0);
+    wrap.style.left=x0+'px';
+    wrap.style.width=w+'px';
+    // hide label if bar too narrow
+    const lbl=wrap.querySelector('.gantt-bar-label');
+    if(lbl) lbl.style.display=w<36?'none':'';
+  });
+}
+
+function attachGanttDrag(){
+  const tooltip=document.getElementById('gantt-tooltip');
+  document.querySelectorAll('.gantt-bar-wrap').forEach(bar=>{
+    bar.addEventListener('mousedown', e=>{
+      // ignore if clicking a resize handle
+      if(e.target.classList.contains('gantt-resize-handle')) return;
+      e.preventDefault();
+      startGanttDrag(e,'move',bar);
+    });
+  });
+  document.querySelectorAll('.gantt-resize-handle').forEach(h=>{
+    h.addEventListener('mousedown', e=>{
+      e.preventDefault(); e.stopPropagation();
+      const bar=h.closest('.gantt-bar-wrap');
+      startGanttDrag(e, h.dataset.mode, bar);
+    });
+  });
+
+  function startGanttDrag(e, mode, bar){
+    const id=bar.dataset.id;
+    const t=tasks.find(x=>x.id===id); if(!t) return;
+    const tl=document.getElementById('gtl-'+id); if(!tl) return;
+    ganttDrag={id, mode, startX:e.clientX, origStart:t.start||t.due, origDue:t.due, tlEl:tl, bar};
+    bar.style.cursor=mode==='move'?'grabbing':'ew-resize';
+    bar.style.opacity='.75';
+    document.body.style.userSelect='none';
+  }
+
+  document.addEventListener('mousemove', e=>{
+    if(!ganttDrag) return;
+    const {id,mode,startX,origStart,origDue,tlEl,bar}=ganttDrag;
+    const tlW=tlEl.getBoundingClientRect().width; if(!tlW) return;
+    const dx=e.clientX-startX;
+    const dayPx=tlW/ganttTotalDays;
+    const deltaDays=Math.round(dx/dayPx);
+    let newStart=origStart, newDue=origDue;
+
+    if(mode==='move'){
+      const s=new Date(origStart+'T00:00'); s.setDate(s.getDate()+deltaDays);
+      const d=new Date(origDue+'T00:00');   d.setDate(d.getDate()+deltaDays);
+      newStart=toStr(s); newDue=toStr(d);
+    } else if(mode==='resize-left'){
+      const s=new Date(origStart+'T00:00'); s.setDate(s.getDate()+deltaDays);
+      // don't let start exceed due
+      if(toStr(s)<=origDue){ newStart=toStr(s) }
+    } else {
+      const d=new Date(origDue+'T00:00'); d.setDate(d.getDate()+deltaDays);
+      if(toStr(d)>=origStart){ newDue=toStr(d) }
+    }
+
+    // live-update bar position
+    const x0=ganttDateToX(newStart,tlW);
+    const x1=ganttDateToX(newDue,tlW)+dayPx;
+    bar.style.left=x0+'px';
+    bar.style.width=Math.max(20,x1-x0)+'px';
+
+    // show tooltip
+    tooltip.style.display='block';
+    tooltip.style.left=(e.clientX+14)+'px';
+    tooltip.style.top=(e.clientY-10)+'px';
+    tooltip.textContent=`${fmtShort(newStart)} → ${fmtShort(newDue)}`;
+  });
+
+  document.addEventListener('mouseup', e=>{
+    if(!ganttDrag) return;
+    const {id,mode,startX,origStart,origDue,tlEl,bar}=ganttDrag;
+    const tlW=tlEl.getBoundingClientRect().width;
+    const dx=e.clientX-startX;
+    const dayPx=tlW/ganttTotalDays;
+    const deltaDays=Math.round(dx/dayPx);
+    const t=tasks.find(x=>x.id===id);
+    if(t && deltaDays!==0){
+      if(mode==='move'){
+        const s=new Date(origStart+'T00:00'); s.setDate(s.getDate()+deltaDays);
+        const d=new Date(origDue+'T00:00');   d.setDate(d.getDate()+deltaDays);
+        t.start=toStr(s); t.due=toStr(d);
+      } else if(mode==='resize-left'){
+        const s=new Date(origStart+'T00:00'); s.setDate(s.getDate()+deltaDays);
+        if(toStr(s)<=origDue) t.start=toStr(s);
+      } else {
+        const d=new Date(origDue+'T00:00'); d.setDate(d.getDate()+deltaDays);
+        if(toStr(d)>=origStart) t.due=toStr(d);
+      }
+      save(); syncPlanner(); updateNotif();
+    }
+    bar.style.cursor='grab'; bar.style.opacity='';
+    tooltip.style.display='none';
+    document.body.style.userSelect='';
+    ganttDrag=null;
+    // re-render to clean up
+    renderGantt();
+  });
 }
 
 /* ══ DRAG & DROP ══ */
@@ -1136,6 +1290,7 @@ function openModal(defaultStatus, defaultDate){
   document.getElementById('f-title').value='';
   document.getElementById('f-desc').value='';
   document.getElementById('f-priority').value='middle';
+  document.getElementById('f-start').value=defaultDate||todayStr();
   document.getElementById('f-due').value=defaultDate||'';
   document.getElementById('f-status').value=defaultStatus||'notstarted';
   document.getElementById('f-progress').value='0';
@@ -1151,6 +1306,7 @@ function openEdit(id){
   document.getElementById('f-title').value=t.title;
   document.getElementById('f-desc').value=t.desc||'';
   document.getElementById('f-priority').value=t.priority;
+  document.getElementById('f-start').value=t.start||t.due||'';
   document.getElementById('f-due').value=t.due||'';
   document.getElementById('f-status').value=t.status;
   document.getElementById('f-progress').value=t.progress||0;
@@ -1167,11 +1323,14 @@ function saveTask(){
   titleEl.style.borderColor='';
   const status=document.getElementById('f-status').value;
   const p=Math.max(0,Math.min(100,parseInt(document.getElementById('f-progress').value)||0));
+  const startVal=document.getElementById('f-start').value;
+  const dueVal=document.getElementById('f-due').value;
   const data={
     title,
     desc:document.getElementById('f-desc').value.trim(),
     priority:document.getElementById('f-priority').value,
-    due:document.getElementById('f-due').value,
+    start: startVal,
+    due: dueVal,
     status,
     progress: status==='completed' ? 100 : p,
   };
@@ -1476,6 +1635,7 @@ function tasksToRows(list){
     'Description':  t.desc||'',
     'Priority':     t.priority.charAt(0).toUpperCase()+t.priority.slice(1),
     'Status':       STATUS_LBL[t.status]||t.status,
+    'Start Date':   t.start ? fmtFull(t.start) : '',
     'Due Date':     t.due ? fmtFull(t.due) : '',
     'Progress (%)': prog(t),
     'Created':      t.created ? new Date(t.created).toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) : '',
