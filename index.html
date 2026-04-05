@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>ToDoi — Task Management</title>
+<title>Task Management</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box}
 :root{
@@ -342,7 +342,7 @@ tr:hover .list-actions{opacity:1}
 <aside id="sidebar">
   <div class="sb-logo">
     <div class="logo-icon"><span></span><span></span><span></span></div>
-    <div class="logo-text">ToDoi</div>
+    <div class="logo-text">Task Management</div>
   </div>
   <nav class="sb-nav">
     <button id="nav-workspace" class="sb-item active" onclick="sbNav('workspace',this)">
@@ -501,9 +501,16 @@ tr:hover .list-actions{opacity:1}
           <div class="pl-main-top">
             <div class="pl-main-top-row">
               <div><h2 id="pl-title">Today</h2><p id="pl-sub"></p></div>
-              <div class="pl-vtabs">
-                <button class="pl-vt active" onclick="setPlView('today',this)">Today</button>
-                <button class="pl-vt" onclick="setPlView('week',this)">This Week</button>
+              <div style="display:flex;align-items:center;gap:8px">
+                <button class="btn-new" style="padding:6px 14px;font-size:12px" onclick="openModal('notstarted', plannerSelectedDate())">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                  Add Task
+                </button>
+                <div class="pl-vtabs">
+                  <button class="pl-vt active" id="pl-vt-today" onclick="setPlView('today',this)">Today</button>
+                  <button class="pl-vt" id="pl-vt-week" onclick="setPlView('week',this)">This Week</button>
+                  <button class="pl-vt" id="pl-vt-date" onclick="setPlView('date',this)" style="display:none">Selected Day</button>
+                </div>
               </div>
             </div>
           </div>
@@ -1197,7 +1204,16 @@ function renderCal(){
   for(let i=first+dim;i<total;i++) h+=`<div class="cal-d dim">${nd++}</div>`;
   document.getElementById('cal-grid').innerHTML=h;
 }
-function pickDate(s){ selDate=new Date(s+'T00:00'); renderCal(); renderPlanner() }
+function pickDate(s){
+  selDate=new Date(s+'T00:00');
+  planView='date';
+  // highlight the "Selected Day" tab
+  document.querySelectorAll('.pl-vt').forEach(b=>b.classList.remove('active'));
+  document.getElementById('pl-vt-date').style.display='';
+  document.getElementById('pl-vt-date').classList.add('active');
+  renderCal();
+  renderPlanner();
+}
 function shiftMonth(d){ calDate.setMonth(calDate.getMonth()+d); renderCal() }
 
 /* ══ WEEK STRIP ══ */
@@ -1220,22 +1236,39 @@ function renderWeekStrip(){
 }
 
 /* ══ PLANNER ══ */
+function plannerSelectedDate(){
+  // returns YYYY-MM-DD for the currently highlighted planner date
+  if(planView==='date') return toStr(selDate);
+  if(planView==='today') return todayStr();
+  return todayStr();
+}
 function setPlView(v,btn){
   planView=v;
   document.querySelectorAll('.pl-vt').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
+  // hide the "Selected Day" tab when user explicitly picks Today or This Week
+  if(v!=='date') document.getElementById('pl-vt-date').style.display='none';
   renderPlanner();
 }
 function renderPlanner(){
-  const today=new Date(); let filtered2,title,sub;
+  const today=new Date(); let filtered2,title,sub,emptyMsg;
   if(planView==='today'){
     filtered2=tasks.filter(t=>isToday(t.due)); title='Today';
     sub=today.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+    emptyMsg='No tasks scheduled for today.';
+  } else if(planView==='date'){
+    const ds=toStr(selDate);
+    filtered2=tasks.filter(t=>t.due===ds);
+    const isT=selDate.toDateString()===today.toDateString();
+    title=isT?'Today':selDate.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric'});
+    sub=selDate.toLocaleDateString('en-US',{weekday:'long',month:'long',day:'numeric',year:'numeric'});
+    emptyMsg=`No tasks scheduled for ${isT?'today':selDate.toLocaleDateString('en-US',{month:'short',day:'numeric'})}.`;
   } else {
     filtered2=tasks.filter(t=>isThisWeek(t.due));
     const sw=new Date(today); sw.setDate(today.getDate()-today.getDay());
     const ew=new Date(sw); ew.setDate(sw.getDate()+6); title='This Week';
     sub=`${sw.toLocaleDateString('en-US',{month:'short',day:'numeric'})} – ${ew.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'})}`;
+    emptyMsg='No tasks scheduled for this week.';
   }
   document.getElementById('pl-title').textContent=title;
   document.getElementById('pl-sub').textContent=sub;
@@ -1244,11 +1277,15 @@ function renderPlanner(){
   document.getElementById('prog-fill').style.width=tot?`${done/tot*100}%`:'0%';
   const cont=document.getElementById('pl-content');
   if(!filtered2.length){
-    cont.innerHTML=`<div class="pl-sec"><div class="empty-pl"><div class="ico">🎉</div><p>No tasks scheduled for ${planView==='today'?'today':'this week'}.</p><p style="margin-top:6px;font-size:12px">Create a task with a due date to see it here.</p></div></div>`;
+    cont.innerHTML=`<div class="pl-sec"><div class="empty-pl"><div class="ico">📅</div>
+      <p>${emptyMsg}</p>
+      <p style="margin-top:6px;font-size:12px">Click "Add Task" above to create one for this date.</p>
+    </div></div>`;
     return;
   }
-  if(planView==='today'){ cont.innerHTML=renderPlSection('Tasks for Today',filtered2) }
-  else {
+  if(planView==='today'||planView==='date'){
+    cont.innerHTML=renderPlSection(planView==='today'?'Tasks for Today':`Tasks for ${title}`, filtered2);
+  } else {
     const sw=new Date(today); sw.setDate(today.getDate()-today.getDay());
     let html='';
     for(let i=0;i<7;i++){
