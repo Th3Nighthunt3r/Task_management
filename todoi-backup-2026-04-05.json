@@ -1,0 +1,250 @@
+{
+  "version": 1,
+  "exported": "2026-04-05T13:29:27.332Z",
+  "profile": {
+    "name": "Jacob Jones",
+    "role": "Assistant"
+  },
+  "wsName": "My Workspace",
+  "tasks": [
+    {
+      "id": "mnlntgieeep0so5r76",
+      "title": "Socials Sept",
+      "desc": "Plan and schedule social media posts for September campaign",
+      "priority": "low",
+      "due": "2026-04-03",
+      "status": "notstarted",
+      "progress": 100,
+      "members": [
+        {
+          "initials": "JJ"
+        }
+      ],
+      "created": "2026-04-05T11:09:59.126Z"
+    },
+    {
+      "id": "mnlntgiefe4c48kmvhd",
+      "title": "Presentation \"Employees...\"",
+      "desc": "Create slides for the employee onboarding presentation",
+      "priority": "middle",
+      "due": "2026-04-05",
+      "status": "notstarted",
+      "progress": 100,
+      "members": [
+        {
+          "initials": "JJ"
+        },
+        {
+          "initials": "SA"
+        },
+        {
+          "initials": "MK"
+        }
+      ],
+      "created": "2026-04-05T11:09:59.126Z"
+    },
+    {
+      "id": "mnlntgiet6bbk5sdbc",
+      "title": "Increase the speed of the site",
+      "desc": "Optimize images and implement lazy loading",
+      "priority": "middle",
+      "due": "2026-04-06",
+      "status": "cancelled",
+      "progress": 20,
+      "members": [
+        {
+          "initials": "JJ"
+        }
+      ],
+      "created": "2026-04-05T11:09:59.126Z"
+    },
+    {
+      "id": "mnlntgie72pjofagvsf",
+      "title": "Content Writing",
+      "desc": "Write blog posts for Q4 marketing push",
+      "priority": "high",
+      "due": "2026-04-05",
+      "status": "notstarted",
+      "progress": 55,
+      "members": [
+        {
+          "initials": "JJ"
+        },
+        {
+          "initials": "SA"
+        },
+        {
+          "initials": "MK"
+        }
+      ],
+      "created": "2026-04-05T11:09:59.126Z"
+    },
+    {
+      "id": "mnlntgie87mjzc5x9o",
+      "title": "Post for Facebook campaign",
+      "desc": "Design and schedule Facebook ad creatives",
+      "priority": "low",
+      "due": "2026-04-07",
+      "status": "cancelled",
+      "progress": 30,
+      "members": [
+        {
+          "initials": "SA"
+        }
+      ],
+      "created": "2026-04-05T11:09:59.126Z"
+    },
+    {
+      "id": "mnlntgiewbr0cy6lcbs",
+      "title": "Study Case Analysis",
+      "desc": "Competitive analysis report for Q4 strategy",
+      "priority": "low",
+      "due": "2026-04-07",
+      "status": "cancelled",
+      "progress": 70,
+      "members": [
+        {
+          "initials": "JJ"
+        },
+        {
+          "initials": "SA"
+        },
+        {
+          "initials": "MK"
+        }
+      ],
+      "created": "2026-04-05T11:09:59.126Z"
+    },
+    {
+      "id": "mnlntgiefalnkyji34i",
+      "title": "HR Manager's Day Event",
+      "desc": "Coordinate celebration event for HR Managers Day",
+      "priority": "middle",
+      "due": "2026-04-07",
+      "status": "cancelled",
+      "progress": 45,
+      "members": [
+        {
+          "initials": "JJ"
+        },
+        {
+          "initials": "SA"
+        }
+      ],
+      "created": "2026-04-05T11:09:59.126Z"
+    },
+    {
+      "id": "mnlntgie1p6s4vngtso",
+      "title": "Get a complete store audit",
+      "desc": "Full audit of online store performance metrics",
+      "priority": "middle",
+      "due": "2026-04-08",
+      "status": "cancelled",
+      "progress": 25,
+      "members": [
+        {
+          "initials": "JJ"
+        },
+        {
+          "initials": "MK"
+        }
+      ],
+      "created": "2026-04-05T11:09:59.126Z"
+    },
+    {
+      "id": "mnlntgie5cztln128b6",
+      "title": "Increase conversion rate",
+      "desc": "A/B test landing page variants to boost conversions",
+      "priority": "low",
+      "due": "2026-04-08",
+      "status": "cancelled",
+      "progress": 50,
+      "members": [
+        {
+          "initials": "JJ"
+        },
+        {
+          "initials": "SA"
+        },
+        {
+          "initials": "MK"
+        }
+      ],
+      "created": "2026-04-05T11:09:59.126Z"
+    },
+    {
+      "id": "mnlntgie7amsioiiqpi",
+      "title": "Targeted advertising setup",
+      "desc": "Configure retargeting ads on Google and Meta",
+      "priority": "high",
+      "due": "2026-04-06",
+      "status": "cancelled",
+      "progress": 100,
+      "members": [
+        {
+          "initials": "JJ"
+        },
+        {
+          "initials": "SA"
+        }
+      ],
+      "created": "2026-04-05T11:09:59.126Z"
+    },
+    {
+      "id": "mnlntgiebagrl289u1f",
+      "title": "Black Box Testing",
+      "desc": "QA testing of new checkout flow",
+      "priority": "high",
+      "due": "2026-04-06",
+      "status": "cancelled",
+      "progress": 100,
+      "members": [
+        {
+          "initials": "JJ"
+        },
+        {
+          "initials": "SA"
+        }
+      ],
+      "created": "2026-04-05T11:09:59.126Z"
+    },
+    {
+      "id": "mnlntgiegm26no6ctx",
+      "title": "Increase confidence with customers",
+      "desc": "Send NPS survey and analyze results",
+      "priority": "low",
+      "due": "2026-04-09",
+      "status": "cancelled",
+      "progress": 10,
+      "members": [
+        {
+          "initials": "JJ"
+        },
+        {
+          "initials": "SA"
+        }
+      ],
+      "created": "2026-04-05T11:09:59.126Z"
+    },
+    {
+      "id": "mnlp9ydt7wbefxaas75",
+      "title": "Creating shopboss Banner",
+      "desc": "1-2 sec video or image via gemini to showcase image",
+      "priority": "middle",
+      "due": "2026-04-05",
+      "status": "inprogress",
+      "progress": 0,
+      "created": "2026-04-05T11:50:48.401Z"
+    },
+    {
+      "id": "mnlpch0vmjky5si24s",
+      "title": "Work on interior for 2 bhk for unity experience",
+      "desc": "Need to make a complete enviz style interior scene for our showmyspace platform",
+      "priority": "middle",
+      "due": "2026-04-05",
+      "status": "notstarted",
+      "progress": 0,
+      "created": "2026-04-05T11:52:45.871Z"
+    }
+  ]
+}

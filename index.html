@@ -43,6 +43,9 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;b
 .search-box input{border:none;background:none;font-size:13px;color:var(--text);outline:none;width:100%;font-family:inherit}
 .search-box input::placeholder{color:var(--muted)}
 .tb-right{margin-left:auto;display:flex;align-items:center;gap:10px}
+.btn-export{display:flex;align-items:center;gap:5px;background:var(--bg);border:1px solid var(--border);border-radius:8px;padding:6px 12px;font-size:12.5px;font-weight:700;color:var(--text);cursor:pointer;transition:.15s;font-family:inherit}
+.btn-export:hover{background:var(--primary-light);border-color:var(--primary);color:var(--primary)}
+.btn-export svg{width:14px;height:14px;flex-shrink:0}
 .workspace-btn{display:flex;align-items:center;gap:6px;background:var(--bg);border:none;border-radius:8px;padding:6px 12px;font-size:12.5px;font-weight:600;color:var(--text);cursor:pointer;font-family:inherit;transition:.15s}
 .workspace-btn:hover{background:var(--border)}
 .workspace-btn svg{width:14px;height:14px;color:var(--muted)}
@@ -384,6 +387,14 @@ tr:hover .list-actions{opacity:1}
       <input placeholder="Search tasks… (Ctrl+K)" id="search-input" oninput="handleSearch(this.value)"/>
     </div>
     <div class="tb-right">
+      <button class="btn-export" onclick="exportTasks()" title="Export tasks to a JSON file you can import on any device">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+        Export
+      </button>
+      <button class="btn-export" onclick="importTasks()" title="Import tasks from a previously exported JSON file">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+        Import
+      </button>
       <button class="workspace-btn" onclick="editWorkspace()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>
         <span id="workspace-label">My Workspace</span>
@@ -1332,6 +1343,62 @@ if(!tasks.length){
     {id:uid(),title:'Customer NPS survey',desc:'Send NPS survey and analyze results.',priority:'low',due:add(4),status:'cancelled',progress:10,created:new Date().toISOString()},
   ];
   save();
+}
+
+/* ══ EXPORT / IMPORT ══ */
+function exportTasks(){
+  const data = {
+    version: 1,
+    exported: new Date().toISOString(),
+    profile,
+    wsName,
+    tasks
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href     = url;
+  a.download = `todoi-backup-${todayStr()}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importTasks(){
+  const input = document.createElement('input');
+  input.type  = 'file';
+  input.accept = '.json,application/json';
+  input.onchange = e => {
+    const file = e.target.files[0]; if(!file) return;
+    const reader = new FileReader();
+    reader.onload = ev => {
+      try {
+        const data = JSON.parse(ev.target.result);
+        if(!Array.isArray(data.tasks)) throw new Error('Invalid file');
+        const incoming = data.tasks.length;
+        const mode = tasks.length
+          ? confirm(`You have ${tasks.length} existing task(s).\n\nOK = Merge (keep both)\nCancel = Replace (overwrite all)`)
+          : false; // no existing tasks → just replace silently
+        if(mode){
+          // merge: add tasks whose id doesn't already exist
+          let added = 0;
+          data.tasks.forEach(t => {
+            if(!tasks.find(x=>x.id===t.id)){ tasks.push(t); added++ }
+          });
+          alert(`Merged! Added ${added} new task(s). ${incoming - added} duplicate(s) skipped.`);
+        } else {
+          tasks = data.tasks;
+          if(data.profile){ profile = data.profile; localStorage.setItem('todoi_profile', JSON.stringify(profile)) }
+          if(data.wsName){  wsName  = data.wsName;  localStorage.setItem('todoi_workspace', wsName) }
+          alert(`Imported ${incoming} task(s) successfully!`);
+        }
+        save(); applyProfile(); renderCurrentView(); syncPlanner(); updateNotif(); renderDashboard();
+      } catch(err){
+        alert('Could not read file. Make sure it is a valid ToDoi export.');
+      }
+    };
+    reader.readAsText(file);
+  };
+  input.click();
 }
 
 /* ══ INIT ══ */
