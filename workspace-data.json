@@ -1,0 +1,155 @@
+{
+  "workspaces": [
+    {
+      "id": "53ee5479-7462-4d0f-934a-436a5ccb740a",
+      "name": "Test Workspace",
+      "owner_id": "008552e9-ef08-4720-9063-1f5f8e7d85f2",
+      "created_at": "2026-04-06T07:50:01.830Z"
+    },
+    {
+      "id": "a34c65f8-69ba-46c9-839f-f32d972e1c9e",
+      "name": "Dev Team",
+      "owner_id": "08b5bbd6-61db-493f-8431-4d3584d26652",
+      "created_at": "2026-04-06T07:50:52.989Z"
+    },
+    {
+      "id": "f0334c62-ef79-4501-ade4-6f774d703077",
+      "name": "Nighthunter",
+      "owner_id": "12fe6879-6069-4077-9fa0-7f06fc2f0240",
+      "created_at": "2026-04-06T11:32:04.393Z"
+    }
+  ],
+  "users": [
+    {
+      "id": "008552e9-ef08-4720-9063-1f5f8e7d85f2",
+      "workspace_id": "53ee5479-7462-4d0f-934a-436a5ccb740a",
+      "email": "test@test.com",
+      "name": "Test User",
+      "role": "Owner",
+      "password_hash": "$2a$10$635cguCAtn1q9/o29eVC.uGaCSkP/sfBCh6w.QZxQRETFsTR8vMK6",
+      "created_at": "2026-04-06T07:50:01.889Z"
+    },
+    {
+      "id": "08b5bbd6-61db-493f-8431-4d3584d26652",
+      "workspace_id": "a34c65f8-69ba-46c9-839f-f32d972e1c9e",
+      "email": "alice@team.com",
+      "name": "Alice Smith",
+      "role": "Owner",
+      "password_hash": "$2a$10$i4Zy9OLwY7B8/NzR0VTEFuTPHbgpFEujww5258sKtqjOZk/7d1S4u",
+      "created_at": "2026-04-06T07:50:53.044Z"
+    },
+    {
+      "id": "12fe6879-6069-4077-9fa0-7f06fc2f0240",
+      "workspace_id": "f0334c62-ef79-4501-ade4-6f774d703077",
+      "email": "1994kumarsuraj@gmail.com",
+      "name": "Suraj Kumar Pradhan",
+      "role": "Owner",
+      "password_hash": "$2a$10$vRxa4RrkcQW8yLlvpRb4Eu.VSHvAn3O91l0EhkfIR44U8YU9726MK",
+      "created_at": "2026-04-06T11:32:04.447Z"
+    }
+  ],
+  "tasks": [
+    {
+      "id": "mnn41pt5v18jj3jmrio",
+      "workspace_id": "f0334c62-ef79-4501-ade4-6f774d703077",
+      "title": "Plan social media posts for September",
+      "desc": "Schedule posts across all platforms for the September campaign.",
+      "priority": "low",
+      "start": "2026-04-04",
+      "due": "2026-04-04",
+      "status": "notstarted",
+      "progress": 15,
+      "created_by": "12fe6879-6069-4077-9fa0-7f06fc2f0240",
+      "created": "2026-04-06T11:32:04.457Z"
+    },
+    {
+      "id": "mnn41pt8o50vk2wpgvr",
+      "workspace_id": "f0334c62-ef79-4501-ade4-6f774d703077",
+      "title": "Send project brief to client",
+      "desc": "Prepare and send the finalized project brief document.",
+      "priority": "middle",
+      "start": "2026-04-06",
+      "due": "2026-04-06",
+      "status": "inreview",
+      "progress": 60,
+      "created_by": "12fe6879-6069-4077-9fa0-7f06fc2f0240",
+      "created": "2026-04-06T11:32:04.460Z"
+    },
+    {
+      "id": "mnn41ptbr792keei3sn",
+      "workspace_id": "f0334c62-ef79-4501-ade4-6f774d703077",
+      "title": "Employee onboarding presentation",
+      "desc": "Create slides for the employee onboarding presentation.",
+      "priority": "middle",
+      "start": "2026-04-06",
+      "due": "2026-04-06",
+      "status": "inreview",
+      "progress": 40,
+      "created_by": "12fe6879-6069-4077-9fa0-7f06fc2f0240",
+      "created": "2026-04-06T11:32:04.463Z"
+    },
+    {
+      "id": "mnn41ptdcybti09bj2",
+      "workspace_id": "f0334c62-ef79-4501-ade4-6f774d703077",
+      "title": "Q4 content writing",
+      "desc": "Write blog posts for the Q4 marketing push.",
+      "priority": "high",
+      "start": "2026-04-06",
+      "due": "2026-04-06",
+      "status": "inprogress",
+      "progress": 55,
+      "created_by": "12fe6879-6069-4077-9fa0-7f06fc2f0240",
+      "created": "2026-04-06T11:32:04.465Z"
+    },
+    {
+      "id": "mnn41ptfn2g3arz1at",
+      "workspace_id": "f0334c62-ef79-4501-ade4-6f774d703077",
+      "title": "Facebook ad campaign creatives",
+      "desc": "Design and schedule Facebook ad creatives.",
+      "priority": "low",
+      "start": "2026-04-08",
+      "due": "2026-04-08",
+      "status": "inprogress",
+      "progress": 30,
+      "created_by": "12fe6879-6069-4077-9fa0-7f06fc2f0240",
+      "created": "2026-04-06T11:32:04.467Z"
+    },
+    {
+      "id": "mnn41pthg1sd6xb04xe",
+      "workspace_id": "f0334c62-ef79-4501-ade4-6f774d703077",
+      "title": "Configure retargeting ads",
+      "desc": "Set up retargeting ads on Google and Meta.",
+      "priority": "high",
+      "start": "2026-04-07",
+      "due": "2026-04-07",
+      "status": "completed",
+      "progress": 100,
+      "created_by": "12fe6879-6069-4077-9fa0-7f06fc2f0240",
+      "created": "2026-04-06T11:32:04.469Z"
+    },
+    {
+      "id": "mnn41ptjk69equaur0r",
+      "workspace_id": "f0334c62-ef79-4501-ade4-6f774d703077",
+      "title": "Customer NPS survey",
+      "desc": "Send NPS survey and analyze results.",
+      "priority": "low",
+      "start": "2026-04-10",
+      "due": "2026-04-10",
+      "status": "cancelled",
+      "progress": 10,
+      "created_by": "12fe6879-6069-4077-9fa0-7f06fc2f0240",
+      "created": "2026-04-06T11:32:04.471Z"
+    }
+  ],
+  "invites": [
+    {
+      "id": "90c61d55-a8a2-4725-af1e-331b911c90b9",
+      "workspace_id": "a34c65f8-69ba-46c9-839f-f32d972e1c9e",
+      "email": "bob@team.com",
+      "token": "a363125d-84a2-4949-9469-c136cadd2649",
+      "invited_by": "08b5bbd6-61db-493f-8431-4d3584d26652",
+      "created_at": "2026-04-06T07:50:53.317Z",
+      "used": false
+    }
+  ]
+}

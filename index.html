@@ -349,6 +349,48 @@ tr:hover .list-actions{opacity:1}
 .placeholder-page .ico{font-size:48px}
 .placeholder-page h2{font-size:18px;font-weight:700;color:var(--text)}
 .placeholder-page p{font-size:13px}
+
+/* AUTH SCREEN */
+#auth-screen{position:fixed;inset:0;z-index:2000;background:linear-gradient(135deg,#1e1b4b 0%,#4c1d95 60%,#1e1b4b 100%);display:flex;align-items:center;justify-content:center}
+#auth-screen.hidden{display:none}
+.auth-card{background:#fff;border-radius:20px;padding:40px;width:420px;box-shadow:0 24px 64px rgba(0,0,0,.35)}
+.auth-logo{text-align:center;margin-bottom:28px}
+.auth-logo-icon{display:flex;gap:3px;align-items:flex-end;justify-content:center;margin-bottom:10px}
+.auth-logo-icon span{width:6px;border-radius:3px;background:var(--primary)}
+.auth-logo-icon span:nth-child(1){height:16px;background:#f472b6}
+.auth-logo-icon span:nth-child(2){height:24px}
+.auth-logo-icon span:nth-child(3){height:20px;background:#06b6d4}
+.auth-app-name{font-size:22px;font-weight:800;color:var(--text)}
+.auth-tagline{font-size:13px;color:var(--muted);margin-top:4px}
+.auth-tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:24px;gap:0}
+.auth-tab{flex:1;padding:9px 8px;border:none;background:none;font-size:13px;font-weight:700;cursor:pointer;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-2px;transition:.15s;font-family:inherit}
+.auth-tab.active{color:var(--primary);border-bottom-color:var(--primary)}
+.auth-form{display:none}
+.auth-form.active{display:block}
+.auth-btn{width:100%;padding:12px;background:var(--primary);color:#fff;border:none;border-radius:10px;font-size:14px;font-weight:700;cursor:pointer;margin-top:16px;font-family:inherit;transition:.15s}
+.auth-btn:hover{background:#6d28d9}
+.auth-error{font-size:12.5px;color:#ef4444;margin-top:8px;min-height:16px}
+
+/* MEMBERS MODAL */
+.members-overlay{position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:400;display:none;align-items:center;justify-content:center}
+.members-overlay.open{display:flex}
+.members-modal{background:#fff;border-radius:16px;padding:28px;width:500px;max-height:82vh;overflow-y:auto;box-shadow:0 12px 48px rgba(0,0,0,.2)}
+.member-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--bg)}
+.member-row:last-child{border-bottom:none}
+.member-av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700;color:#fff;flex-shrink:0}
+.member-info{flex:1;min-width:0}
+.member-name{font-size:13.5px;font-weight:700;color:var(--text)}
+.member-email{font-size:11.5px;color:var(--muted);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.member-role-badge{font-size:10.5px;font-weight:800;padding:2px 9px;border-radius:20px;background:var(--primary-light);color:var(--primary);flex-shrink:0}
+.invite-section{margin-top:20px;padding-top:20px;border-top:1px solid var(--border)}
+.invite-input-row{display:flex;gap:8px;margin-top:8px}
+.invite-input-row input{flex:1;padding:9px 12px;border:1.5px solid var(--border);border-radius:9px;font-size:13px;outline:none;font-family:inherit}
+.invite-input-row input:focus{border-color:var(--primary)}
+.invite-result{margin-top:12px;padding:14px;background:var(--bg);border-radius:10px;font-size:12.5px;display:none}
+.invite-result.show{display:block}
+.invite-code-box{font-family:monospace;font-size:13px;font-weight:700;background:#fff;border:1.5px solid var(--border);border-radius:8px;padding:10px 14px;word-break:break-all;margin-top:8px;color:var(--text)}
+.copy-btn{display:inline-flex;align-items:center;gap:5px;padding:6px 13px;background:var(--primary);color:#fff;border:none;border-radius:7px;font-size:12px;font-weight:700;cursor:pointer;margin-top:8px;font-family:inherit;transition:.15s}
+.copy-btn:hover{background:#6d28d9}
 </style>
 </head>
 <body>
@@ -385,6 +427,10 @@ tr:hover .list-actions{opacity:1}
       Chat
     </button>
     <div class="sb-divider"></div>
+    <button class="sb-item" onclick="openMembersModal()">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>
+      Members
+    </button>
     <button class="sb-item sb-logout" onclick="handleLogout()">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg>
       Log Out
@@ -693,16 +739,91 @@ tr:hover .list-actions{opacity:1}
       <div id="profile-avatar-preview" style="width:62px;height:62px;border-radius:50%;background:linear-gradient(135deg,#6366f1,#8b5cf6);display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;color:#fff">JJ</div>
     </div>
     <div class="fg">
+      <label style="display:flex;justify-content:space-between">Email <span id="p-role-badge" style="font-size:10.5px;font-weight:800;background:var(--primary-light);color:var(--primary);padding:1px 8px;border-radius:20px"></span></label>
+      <input id="p-email" style="background:var(--bg);color:var(--muted);cursor:default" readonly/>
+    </div>
+    <div class="fg">
       <label>Full Name</label>
       <input id="p-name" placeholder="Your name" oninput="updateAvatarPreview()"/>
     </div>
     <div class="fg">
-      <label>Role / Title</label>
+      <label>Job Title</label>
       <input id="p-role" placeholder="e.g. Designer, Manager"/>
     </div>
     <div class="modal-ftr">
       <button class="btn-cancel" onclick="closeProfileModal()">Cancel</button>
       <button class="btn-new" onclick="saveProfile()">Save Profile</button>
+    </div>
+  </div>
+</div>
+
+<!-- AUTH SCREEN -->
+<div id="auth-screen">
+  <div class="auth-card">
+    <div class="auth-logo">
+      <div class="auth-logo-icon"><span></span><span></span><span></span></div>
+      <div class="auth-app-name">Task Management</div>
+      <div class="auth-tagline">Collaborate on tasks with your team</div>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" id="at-login" onclick="switchAuthTab('login')">Log In</button>
+      <button class="auth-tab" id="at-register" onclick="switchAuthTab('register')">Create Account</button>
+      <button class="auth-tab" id="at-join" onclick="switchAuthTab('join')">Join Workspace</button>
+    </div>
+
+    <!-- LOGIN -->
+    <div class="auth-form active" id="af-login">
+      <div class="fg"><label>Email</label><input id="l-email" type="email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <div class="fg"><label>Password</label><input id="l-password" type="password" placeholder="Your password" onkeydown="if(event.key==='Enter')doLogin()"/></div>
+      <div class="auth-error" id="l-error"></div>
+      <button class="auth-btn" onclick="doLogin()">Log In</button>
+    </div>
+
+    <!-- REGISTER -->
+    <div class="auth-form" id="af-register">
+      <div class="fg"><label>Workspace Name</label><input id="r-workspace" placeholder="e.g. Acme Team" onkeydown="if(event.key==='Enter')doRegister()"/></div>
+      <div class="fg"><label>Your Full Name</label><input id="r-name" placeholder="Your name" onkeydown="if(event.key==='Enter')doRegister()"/></div>
+      <div class="fg"><label>Email</label><input id="r-email" type="email" placeholder="you@example.com" onkeydown="if(event.key==='Enter')doRegister()"/></div>
+      <div class="fg"><label>Password</label><input id="r-password" type="password" placeholder="At least 6 characters" onkeydown="if(event.key==='Enter')doRegister()"/></div>
+      <div class="auth-error" id="r-error"></div>
+      <button class="auth-btn" onclick="doRegister()">Create Workspace</button>
+    </div>
+
+    <!-- JOIN -->
+    <div class="auth-form" id="af-join">
+      <p style="font-size:13px;color:var(--muted);margin-bottom:16px">Enter the invite code shared by your workspace owner.</p>
+      <div class="fg"><label>Invite Code</label><input id="j-code" placeholder="Paste the invite code here" onkeydown="if(event.key==='Enter')doJoinInvite()"/></div>
+      <div class="fg"><label>Your Full Name</label><input id="j-name" placeholder="Your name" onkeydown="if(event.key==='Enter')doJoinInvite()"/></div>
+      <div class="fg"><label>Choose Password</label><input id="j-password" type="password" placeholder="At least 6 characters" onkeydown="if(event.key==='Enter')doJoinInvite()"/></div>
+      <div class="auth-error" id="j-error"></div>
+      <button class="auth-btn" onclick="doJoinInvite()">Join Workspace</button>
+    </div>
+  </div>
+</div>
+
+<!-- MEMBERS MODAL -->
+<div class="members-overlay" id="members-overlay" onclick="if(event.target===this)closeMembersModal()">
+  <div class="members-modal">
+    <div class="modal-hd">
+      <h2>Workspace Members</h2>
+      <button class="modal-close" onclick="closeMembersModal()">×</button>
+    </div>
+    <div id="members-list" style="margin-top:8px"></div>
+    <div class="invite-section">
+      <h3 style="font-size:14px;font-weight:800;margin-bottom:4px">Invite Member</h3>
+      <p style="font-size:12.5px;color:var(--muted)">Enter their email to generate an invite code to share with them.</p>
+      <div class="invite-input-row">
+        <input id="invite-email" type="email" placeholder="colleague@example.com" onkeydown="if(event.key==='Enter')inviteMember()"/>
+        <button class="btn-new" style="padding:8px 16px;font-size:12.5px;white-space:nowrap" onclick="inviteMember()">Generate Invite</button>
+      </div>
+      <div class="invite-result" id="invite-result">
+        <div style="font-size:12px;font-weight:700;color:var(--muted)">Share this invite code with your colleague. They enter it in the "Join Workspace" tab.</div>
+        <div class="invite-code-box" id="invite-code-box"></div>
+        <button class="copy-btn" onclick="copyInviteCode()">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>
+          Copy Code
+        </button>
+      </div>
     </div>
   </div>
 </div>
@@ -721,9 +842,10 @@ const STATUS_LBL = {notstarted:'Not Started',inreview:'In Review',inprogress:'In
 const PRI_ORDER  = {high:0,middle:1,low:2};
 
 /* ══ STATE ══ */
-let tasks        = JSON.parse(localStorage.getItem('todoi_tasks')   || '[]');
-let profile      = JSON.parse(localStorage.getItem('todoi_profile') || '{"name":"Jacob Jones","role":"Assistant"}');
-let wsName       = localStorage.getItem('todoi_workspace') || 'My Workspace';
+let tasks        = [];
+let profile      = { name: '', role: '' };
+let wsName       = 'My Workspace';
+let currentUser  = null;
 let dragging     = null, editId = null;
 let calDate      = new Date(), selDate = new Date(), planView = 'today';
 let searchQuery  = '', statusFilter = 'all';
@@ -732,8 +854,25 @@ let sortField    = 'created', sortDir = -1;
 let taskCalDate  = new Date();
 
 /* ══ HELPERS ══ */
-function uid()      { return Date.now().toString(36) + Math.random().toString(36).slice(2) }
-function save()     { localStorage.setItem('todoi_tasks', JSON.stringify(tasks)) }
+function uid()  { return Date.now().toString(36) + Math.random().toString(36).slice(2) }
+function save() {} // tasks are persisted via API; local array is the UI cache
+
+const API_BASE = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1'
+  ? ''   // Electron/local: same-origin (localhost:3001)
+  : 'https://YOUR-RAILWAY-APP.up.railway.app'; // ← paste your Railway URL here
+
+async function api(method, endpoint, body) {
+  const token = localStorage.getItem('todoi_token');
+  try {
+    const res = await fetch(API_BASE + endpoint, {
+      method,
+      headers: { 'Content-Type': 'application/json', ...(token ? { Authorization: 'Bearer ' + token } : {}) },
+      body: body ? JSON.stringify(body) : undefined
+    });
+    if (res.status === 401) { handleLogout(); return null; }
+    return res.json();
+  } catch (e) { console.error('API error:', e); return null; }
+}
 function esc(s)     { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;') }
 function toStr(d)   { return d.toISOString().split('T')[0] }
 function todayStr() { return toStr(new Date()) }
@@ -769,8 +908,12 @@ function applyProfile(){
 }
 function openProfileModal(){
   document.getElementById('p-name').value = profile.name;
-  document.getElementById('p-role').value = profile.role;
+  document.getElementById('p-role').value = localStorage.getItem('todoi_job_title') || '';
   document.getElementById('profile-avatar-preview').textContent = initials(profile.name);
+  if (currentUser) {
+    document.getElementById('p-email').value = currentUser.email;
+    document.getElementById('p-role-badge').textContent = currentUser.role;
+  }
   document.getElementById('profile-overlay').classList.add('open');
 }
 function closeProfileModal(){ document.getElementById('profile-overlay').classList.remove('open') }
@@ -778,29 +921,35 @@ function profileOverlayClick(e){ if(e.target===document.getElementById('profile-
 function updateAvatarPreview(){
   document.getElementById('profile-avatar-preview').textContent = initials(document.getElementById('p-name').value) || '?';
 }
-function saveProfile(){
+async function saveProfile(){
   const name = document.getElementById('p-name').value.trim();
-  const role = document.getElementById('p-role').value.trim();
+  const jobTitle = document.getElementById('p-role').value.trim();
   if(!name){ document.getElementById('p-name').style.borderColor='#ef4444'; return }
   document.getElementById('p-name').style.borderColor='';
-  profile = {name, role};
-  localStorage.setItem('todoi_profile', JSON.stringify(profile));
+  profile = { name, role: currentUser?.role || jobTitle };
+  localStorage.setItem('todoi_job_title', jobTitle);
+  if(currentUser) {
+    currentUser.name = name;
+    api('PUT', '/api/me', { name }); // fire and forget
+  }
   applyProfile();
   closeProfileModal();
   if(currentPage==='workspace') renderDashboard();
 }
-function editWorkspace(){
+async function editWorkspace(){
   const n = prompt('Workspace name:', wsName);
   if(n && n.trim()){
     wsName = n.trim();
-    localStorage.setItem('todoi_workspace', wsName);
+    api('PUT', '/api/workspace', { name: wsName }); // fire and forget
     applyProfile();
     if(currentPage==='workspace') renderDashboard();
   }
 }
 function handleLogout(){
-  if(confirm('Reset all data and start fresh? This cannot be undone.')){
-    localStorage.clear(); location.reload();
+  if(confirm('Log out of this workspace?')){
+    localStorage.removeItem('todoi_token');
+    currentUser = null; tasks = []; profile = { name:'', role:'' }; wsName = 'My Workspace';
+    showAuthScreen('login');
   }
 }
 
@@ -953,7 +1102,8 @@ function quickComplete(id){
   const t = tasks.find(x=>x.id===id); if(!t) return;
   t.status = t.status==='completed' ? 'notstarted' : 'completed';
   if(t.status==='completed') t.progress=100;
-  save(); renderCurrentView(); syncPlanner(); updateNotif();
+  api('PUT', '/api/tasks/'+id, {status:t.status, progress:t.progress});
+  renderCurrentView(); syncPlanner(); updateNotif();
 }
 
 /* ══ GRID VIEW ══ */
@@ -1211,7 +1361,8 @@ function attachGanttDrag(){
         const d=new Date(origDue+'T00:00'); d.setDate(d.getDate()+deltaDays);
         if(toStr(d)>=origStart) t.due=toStr(d);
       }
-      save(); syncPlanner(); updateNotif();
+      api('PUT', '/api/tasks/'+t.id, {start:t.start, due:t.due});
+      syncPlanner(); updateNotif();
     }
     bar.style.cursor='grab'; bar.style.opacity='';
     tooltip.style.display='none';
@@ -1238,7 +1389,11 @@ function drop(e,s){
   e.preventDefault(); e.currentTarget.classList.remove('drag-over');
   if(!dragging) return;
   const t=tasks.find(x=>x.id===dragging);
-  if(t && t.status!==s){ t.status=s; if(s==='completed') t.progress=100; save(); renderKanban(); syncPlanner(); updateNotif() }
+  if(t && t.status!==s){
+    t.status=s; if(s==='completed') t.progress=100;
+    api('PUT', '/api/tasks/'+t.id, {status:t.status, progress:t.progress});
+    renderKanban(); syncPlanner(); updateNotif();
+  }
 }
 
 /* ══ SEARCH & FILTER ══ */
@@ -1316,33 +1471,39 @@ function openEdit(id){
 function closeModal(){ document.getElementById('overlay').classList.remove('open') }
 function overlayClick(e){ if(e.target===document.getElementById('overlay')) closeModal() }
 
-function saveTask(){
+async function saveTask(){
   const titleEl=document.getElementById('f-title');
   const title=titleEl.value.trim();
   if(!title){ titleEl.style.borderColor='#ef4444'; titleEl.focus(); return }
   titleEl.style.borderColor='';
   const status=document.getElementById('f-status').value;
   const p=Math.max(0,Math.min(100,parseInt(document.getElementById('f-progress').value)||0));
-  const startVal=document.getElementById('f-start').value;
-  const dueVal=document.getElementById('f-due').value;
   const data={
     title,
     desc:document.getElementById('f-desc').value.trim(),
     priority:document.getElementById('f-priority').value,
-    start: startVal,
-    due: dueVal,
+    start: document.getElementById('f-start').value,
+    due: document.getElementById('f-due').value,
     status,
     progress: status==='completed' ? 100 : p,
   };
-  if(editId){ Object.assign(tasks.find(x=>x.id===editId), data) }
-  else { tasks.push({id:uid(),...data,created:new Date().toISOString()}) }
-  save(); closeModal(); renderCurrentView(); syncPlanner(); updateNotif();
+  if(editId){
+    Object.assign(tasks.find(x=>x.id===editId), data); // optimistic
+    api('PUT', '/api/tasks/'+editId, data);
+  } else {
+    const newTask={id:uid(),...data,created:new Date().toISOString()};
+    tasks.push(newTask); // optimistic
+    api('POST', '/api/tasks', newTask);
+  }
+  closeModal(); renderCurrentView(); syncPlanner(); updateNotif();
   if(currentPage==='workspace') renderDashboard();
 }
 
 function delTask(id){
   if(!confirm('Delete this task?')) return;
-  tasks=tasks.filter(t=>t.id!==id); save(); renderCurrentView(); syncPlanner(); updateNotif();
+  tasks=tasks.filter(t=>t.id!==id);
+  api('DELETE', '/api/tasks/'+id);
+  renderCurrentView(); syncPlanner(); updateNotif();
   if(currentPage==='workspace') renderDashboard();
 }
 
@@ -1572,7 +1733,8 @@ function cyclePlStatus(e,id){
   const cycle={notstarted:'inprogress',inreview:'inprogress',inprogress:'completed',completed:'notstarted',cancelled:'notstarted'};
   t.status=cycle[t.status];
   if(t.status==='completed') t.progress=100;
-  save(); renderKanban(); renderPlanner(); renderWeekStrip(); renderCal(); updateNotif();
+  api('PUT', '/api/tasks/'+id, {status:t.status, progress:t.progress});
+  renderKanban(); renderPlanner(); renderWeekStrip(); renderCal(); updateNotif();
 }
 function syncPlanner(){
   if(document.getElementById('page-planner').classList.contains('active')){ renderCal(); renderWeekStrip(); renderPlanner() }
@@ -1598,25 +1760,23 @@ document.addEventListener('keydown', e=>{
 });
 document.addEventListener('click', ()=>closeDropdowns());
 
-/* ══ SEED DATA ══ */
-if(!tasks.length){
+/* ══ SEED DATA (used only for fresh workspaces) ══ */
+async function seedTasks(){
   const add=n=>{ const d=new Date(); d.setDate(d.getDate()+n); return toStr(d) };
-  tasks=[
-    {id:uid(),title:'Plan social media posts for September',desc:'Schedule posts across all platforms for the September campaign.',priority:'low',due:add(-2),status:'notstarted',progress:15,created:new Date().toISOString()},
-    {id:uid(),title:'Send project brief to client',desc:'Prepare and send the finalized project brief document.',priority:'middle',due:add(0),status:'inreview',progress:60,created:new Date().toISOString()},
-    {id:uid(),title:'Employee onboarding presentation',desc:'Create slides for the employee onboarding presentation.',priority:'middle',due:add(0),status:'inreview',progress:40,created:new Date().toISOString()},
-    {id:uid(),title:'Optimize website loading speed',desc:'Optimize images, implement lazy loading and caching.',priority:'middle',due:add(1),status:'inreview',progress:20,created:new Date().toISOString()},
-    {id:uid(),title:'Q4 content writing',desc:'Write blog posts for the Q4 marketing push.',priority:'high',due:add(0),status:'inprogress',progress:55,created:new Date().toISOString()},
-    {id:uid(),title:'Facebook ad campaign creatives',desc:'Design and schedule Facebook ad creatives.',priority:'low',due:add(2),status:'inprogress',progress:30,created:new Date().toISOString()},
-    {id:uid(),title:'Competitive analysis report',desc:'Study case competitive analysis for Q4 strategy.',priority:'low',due:add(2),status:'inprogress',progress:70,created:new Date().toISOString()},
-    {id:uid(),title:'HR Managers Day coordination',desc:'Coordinate the celebration event for HR Managers Day.',priority:'middle',due:add(2),status:'inprogress',progress:45,created:new Date().toISOString()},
-    {id:uid(),title:'Online store performance audit',desc:'Full audit of online store performance metrics.',priority:'middle',due:add(3),status:'inprogress',progress:25,created:new Date().toISOString()},
-    {id:uid(),title:'A/B test landing page conversion',desc:'A/B test landing page variants to boost conversions.',priority:'low',due:add(3),status:'inprogress',progress:50,created:new Date().toISOString()},
-    {id:uid(),title:'Configure retargeting ads',desc:'Set up retargeting ads on Google and Meta.',priority:'high',due:add(1),status:'completed',progress:100,created:new Date().toISOString()},
-    {id:uid(),title:'Black box testing checkout flow',desc:'QA testing of new checkout flow.',priority:'high',due:add(1),status:'completed',progress:100,created:new Date().toISOString()},
-    {id:uid(),title:'Customer NPS survey',desc:'Send NPS survey and analyze results.',priority:'low',due:add(4),status:'cancelled',progress:10,created:new Date().toISOString()},
+  const seeds=[
+    {title:'Plan social media posts for September',desc:'Schedule posts across all platforms for the September campaign.',priority:'low',due:add(-2),status:'notstarted',progress:15},
+    {title:'Send project brief to client',desc:'Prepare and send the finalized project brief document.',priority:'middle',due:add(0),status:'inreview',progress:60},
+    {title:'Employee onboarding presentation',desc:'Create slides for the employee onboarding presentation.',priority:'middle',due:add(0),status:'inreview',progress:40},
+    {title:'Q4 content writing',desc:'Write blog posts for the Q4 marketing push.',priority:'high',due:add(0),status:'inprogress',progress:55},
+    {title:'Facebook ad campaign creatives',desc:'Design and schedule Facebook ad creatives.',priority:'low',due:add(2),status:'inprogress',progress:30},
+    {title:'Configure retargeting ads',desc:'Set up retargeting ads on Google and Meta.',priority:'high',due:add(1),status:'completed',progress:100},
+    {title:'Customer NPS survey',desc:'Send NPS survey and analyze results.',priority:'low',due:add(4),status:'cancelled',progress:10},
   ];
-  save();
+  for(const s of seeds){
+    const t={id:uid(),...s,start:s.due,created:new Date().toISOString()};
+    tasks.push(t);
+    await api('POST','/api/tasks',t);
+  }
 }
 
 /* ══ EXPORT MENU ══ */
@@ -1712,9 +1872,8 @@ function runCustomExcelExport(){
 /* ══ EXPORT / IMPORT ══ */
 function exportTasks(){
   const data = {
-    version: 1,
+    version: 2,
     exported: new Date().toISOString(),
-    profile,
     wsName,
     tasks
   };
@@ -1734,28 +1893,31 @@ function importTasks(){
   input.onchange = e => {
     const file = e.target.files[0]; if(!file) return;
     const reader = new FileReader();
-    reader.onload = ev => {
+    reader.onload = async ev => {
       try {
         const data = JSON.parse(ev.target.result);
         if(!Array.isArray(data.tasks)) throw new Error('Invalid file');
         const incoming = data.tasks.length;
-        const mode = tasks.length
+        const merge = tasks.length
           ? confirm(`You have ${tasks.length} existing task(s).\n\nOK = Merge (keep both)\nCancel = Replace (overwrite all)`)
-          : false; // no existing tasks → just replace silently
-        if(mode){
-          // merge: add tasks whose id doesn't already exist
-          let added = 0;
-          data.tasks.forEach(t => {
-            if(!tasks.find(x=>x.id===t.id)){ tasks.push(t); added++ }
-          });
-          alert(`Merged! Added ${added} new task(s). ${incoming - added} duplicate(s) skipped.`);
+          : false;
+        let toImport = [];
+        if(merge){
+          toImport = data.tasks.filter(t => !tasks.find(x=>x.id===t.id));
+          alert(`Merging ${toImport.length} new task(s). ${incoming - toImport.length} duplicate(s) skipped.`);
         } else {
-          tasks = data.tasks;
-          if(data.profile){ profile = data.profile; localStorage.setItem('todoi_profile', JSON.stringify(profile)) }
-          if(data.wsName){  wsName  = data.wsName;  localStorage.setItem('todoi_workspace', wsName) }
-          alert(`Imported ${incoming} task(s) successfully!`);
+          // Delete existing tasks first
+          for(const t of [...tasks]) await api('DELETE','/api/tasks/'+t.id);
+          tasks=[];
+          toImport = data.tasks;
+          if(data.wsName){ wsName=data.wsName; api('PUT','/api/workspace',{name:wsName}); }
+          alert(`Importing ${toImport.length} task(s)…`);
         }
-        save(); applyProfile(); renderCurrentView(); syncPlanner(); updateNotif(); renderDashboard();
+        for(const t of toImport){
+          tasks.push(t);
+          await api('POST','/api/tasks',t);
+        }
+        applyProfile(); renderCurrentView(); syncPlanner(); updateNotif(); renderDashboard();
       } catch(err){
         alert('Could not read file. Make sure it is a valid ToDoi export.');
       }
@@ -1765,10 +1927,139 @@ function importTasks(){
   input.click();
 }
 
+/* ══ AUTH ══ */
+function switchAuthTab(tab){
+  ['login','register','join'].forEach(t=>{
+    document.getElementById('at-'+t).classList.toggle('active', t===tab);
+    document.getElementById('af-'+t).classList.toggle('active', t===tab);
+  });
+}
+function showAuthScreen(tab){
+  document.getElementById('auth-screen').classList.remove('hidden');
+  switchAuthTab(tab||'login');
+}
+function hideAuthScreen(){
+  document.getElementById('auth-screen').classList.add('hidden');
+}
+
+async function doLogin(){
+  const email=document.getElementById('l-email').value.trim();
+  const password=document.getElementById('l-password').value;
+  const errEl=document.getElementById('l-error');
+  errEl.textContent='';
+  if(!email||!password){ errEl.textContent='Please fill in all fields.'; return; }
+  const result=await api('POST','/api/login',{email,password});
+  if(!result){ errEl.textContent='Could not reach server. Make sure the app is running.'; return; }
+  if(result.error){ errEl.textContent=result.error; return; }
+  localStorage.setItem('todoi_token',result.token);
+  currentUser=result.user;
+  await afterAuth();
+}
+
+async function doRegister(){
+  const workspace=document.getElementById('r-workspace').value.trim();
+  const name=document.getElementById('r-name').value.trim();
+  const email=document.getElementById('r-email').value.trim();
+  const password=document.getElementById('r-password').value;
+  const errEl=document.getElementById('r-error');
+  errEl.textContent='';
+  if(!workspace||!name||!email||!password){ errEl.textContent='Please fill in all fields.'; return; }
+  if(password.length<6){ errEl.textContent='Password must be at least 6 characters.'; return; }
+  const result=await api('POST','/api/register',{name,email,password,workspaceName:workspace});
+  if(!result){ errEl.textContent='Could not reach server.'; return; }
+  if(result.error){ errEl.textContent=result.error; return; }
+  localStorage.setItem('todoi_token',result.token);
+  currentUser=result.user;
+  await afterAuth(true);
+}
+
+async function doJoinInvite(){
+  const code=document.getElementById('j-code').value.trim();
+  const name=document.getElementById('j-name').value.trim();
+  const password=document.getElementById('j-password').value;
+  const errEl=document.getElementById('j-error');
+  errEl.textContent='';
+  if(!code||!name||!password){ errEl.textContent='Please fill in all fields.'; return; }
+  if(password.length<6){ errEl.textContent='Password must be at least 6 characters.'; return; }
+  const check=await fetch(API_BASE+'/api/invite/'+code).then(r=>r.json()).catch(()=>null);
+  if(!check||check.error){ errEl.textContent=check?.error||'Invalid invite code.'; return; }
+  const result=await api('POST','/api/invite/'+code+'/accept',{name,password});
+  if(!result){ errEl.textContent='Could not reach server.'; return; }
+  if(result.error){ errEl.textContent=result.error; return; }
+  localStorage.setItem('todoi_token',result.token);
+  currentUser=result.user;
+  await afterAuth();
+}
+
+async function afterAuth(freshWorkspace){
+  const wsData=await api('GET','/api/workspace');
+  wsName=wsData?.name||'My Workspace';
+  profile={name:currentUser.name, role:currentUser.role};
+  const tasksData=await api('GET','/api/tasks');
+  tasks=tasksData||[];
+  if(freshWorkspace&&!tasks.length) await seedTasks();
+  hideAuthScreen();
+  applyProfile();
+  renderDashboard();
+  renderCurrentView();
+  updateNotif();
+  // Poll for new tasks every 30 seconds (basic multi-user sync)
+  if(window._syncInterval) clearInterval(window._syncInterval);
+  window._syncInterval=setInterval(async()=>{
+    const t=await api('GET','/api/tasks');
+    if(t){ tasks=t; renderCurrentView(); updateNotif(); }
+  }, 30000);
+}
+
+/* ══ MEMBERS ══ */
+async function openMembersModal(){
+  document.getElementById('members-overlay').classList.add('open');
+  document.getElementById('invite-result').classList.remove('show');
+  document.getElementById('invite-email').value='';
+  const members=await api('GET','/api/members');
+  const list=document.getElementById('members-list');
+  if(!members||!members.length){ list.innerHTML='<p style="color:var(--muted);font-size:13px;padding:8px 0">No members yet.</p>'; return; }
+  list.innerHTML=members.map(m=>`
+    <div class="member-row">
+      <div class="member-av">${initials(m.name)}</div>
+      <div class="member-info">
+        <div class="member-name">${esc(m.name)}${m.id===currentUser?.id?' <span style="font-size:10px;color:var(--muted)">(you)</span>':''}</div>
+        <div class="member-email">${esc(m.email)}</div>
+      </div>
+      <span class="member-role-badge">${esc(m.role)}</span>
+    </div>`).join('');
+}
+function closeMembersModal(){
+  document.getElementById('members-overlay').classList.remove('open');
+}
+async function inviteMember(){
+  const email=document.getElementById('invite-email').value.trim();
+  if(!email){ return; }
+  const result=await api('POST','/api/invite',{email});
+  if(!result){ alert('Server error.'); return; }
+  if(result.error){ alert(result.error); return; }
+  document.getElementById('invite-code-box').textContent=result.token;
+  document.getElementById('invite-result').classList.add('show');
+}
+function copyInviteCode(){
+  const code=document.getElementById('invite-code-box').textContent;
+  navigator.clipboard.writeText(code).then(()=>{
+    const btn=document.querySelector('.copy-btn');
+    const orig=btn.innerHTML; btn.textContent='Copied!';
+    setTimeout(()=>btn.innerHTML=orig, 2000);
+  }).catch(()=>{ document.execCommand&&document.execCommand('copy') });
+}
+
 /* ══ INIT ══ */
-applyProfile();
-renderDashboard();
-updateNotif();
+async function init(){
+  const token=localStorage.getItem('todoi_token');
+  if(!token){ showAuthScreen('login'); return; }
+  const userData=await api('GET','/api/me');
+  if(!userData||userData.error){ showAuthScreen('login'); return; }
+  currentUser=userData;
+  await afterAuth();
+}
+init();
 </script>
 </body>
 </html>

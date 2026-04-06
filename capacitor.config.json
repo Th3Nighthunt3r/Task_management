@@ -1,0 +1,25 @@
+{
+  "appId": "com.taskmanagement.app",
+  "appName": "Task Management",
+  "webDir": ".",
+  "server": {
+    "androidScheme": "https",
+    "cleartext": false
+  },
+  "plugins": {
+    "SplashScreen": {
+      "launchShowDuration": 1500,
+      "backgroundColor": "#0f0f1a",
+      "androidSplashResourceName": "splash",
+      "showSpinner": false
+    }
+  },
+  "android": {
+    "allowMixedContent": false,
+    "captureInput": true,
+    "webContentsDebuggingEnabled": false
+  },
+  "ios": {
+    "contentInset": "automatic"
+  }
+}
