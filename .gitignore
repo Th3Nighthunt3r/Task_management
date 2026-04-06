@@ -1,0 +1,5 @@
+node_modules/
+dist/
+workspace-data.json
+*.log
+.env
